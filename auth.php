@@ -80,7 +80,7 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
         $ch_active_user = curl_init($earlychildhood_active_user);
 
         curl_setopt($ch_active_user, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch_active_user, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch_active_user, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($ch_active_user, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch_active_user, CURLOPT_HTTPHEADER, array(
             'Authorization Bearer: '.$access_token)
