@@ -33,7 +33,12 @@ require_once($CFG->libdir.'/authlib.php');
 class auth_plugin_earlychildhood extends auth_plugin_base {
 
     public function loginpage_hook(){
+        
         global $CFG;
+
+        $current_user_encode = $_GET['currentUser'];
+
+        print_r($current_user_encode);
 
         $grant_type = "password";
         $client_id = "1_3bcbxd9e24g0gk4swg0kwgcwg4o8k8g4g888kwc44gcc0gwwk4";
@@ -80,7 +85,7 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
         $ch_active_user = curl_init($earlychildhood_active_user);
 
         curl_setopt($ch_active_user, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch_active_user, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch_active_user, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($ch_active_user, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch_active_user, CURLOPT_HTTPHEADER, array(
             'Authorization Bearer: '.$access_token)
