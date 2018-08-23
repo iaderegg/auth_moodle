@@ -104,6 +104,8 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             print_r($reponse_active_user);
         }
 
+        die;
+
     }
 
     public function user_login($username, $password) {
