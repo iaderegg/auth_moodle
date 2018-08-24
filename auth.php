@@ -30,6 +30,10 @@ if (!defined('MOODLE_INTERNAL')) {
 
 require_once($CFG->libdir.'/authlib.php');
 
+
+error_reporting(E_ALL); 
+ini_set('display_errors', 1);
+
 class auth_plugin_earlychildhood extends auth_plugin_base {
 
     public function loginpage_hook(){
@@ -80,32 +84,38 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
         $access_token = $response_decode->access_token;
 
         // Request for active user in app
-        $ch_active_user = curl_init($earlychildhood_active_user);
+        $ch_active_user = curl_init();
 
+        curl_setopt($ch_active_user, CURLOPT_URL, $earlychildhood_active_user);
         curl_setopt($ch_active_user, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch_active_user, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch_active_user, CURLOPT_CUSTOMREQUEST, "GET");
-        curl_setopt($ch_active_user, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch_active_user, CURLOPT_HEADER, false); 
+        curl_setopt($ch_active_user, CURLOPT_VERBOSE, false);
+        curl_setopt($ch_active_user, CURLOPT_TIMEOUT, 500);
         curl_setopt($ch_active_user, CURLOPT_HTTPHEADER, array(
-            'Authorization: Bearer '.$access_token)
+            'Authorization: Bearer '.$access_token
+            )
         );
 
         // Response to request
-        $reponse_active_user = curl_exec($ch_active_user);
+        $response_active_user = curl_exec($ch_active_user);
+        $httpcode = curl_getinfo($ch_active_user);
+
+        print_r('<br>');
+        print_r($httpcode);
+        
+        
 
         curl_close($ch_active_user);
 
-        if(!$response) {
+        if(!$response_active_user) {
             return false;
         }else{
-            var_dump($reponse_active_user);
-            $response_decode = json_decode($response);
-            print_r("Response decode");
-            print_r("<br>");
-            print_r($reponse_active_user);
+            print_r('Response decoded');
+            print_r('<br>');
+            print_r(json_decode($response_active_user));
         }
-
-        die;
-
     }
 
     public function user_login($username, $password) {
