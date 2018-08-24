@@ -20,5 +20,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Autenticación Primera Infancia';
-$string['auth_earlychildhood'] = 'Auth Primera Infancia';
+$string['pluginname'] = "Autenticación Primera Infancia";
+$string['auth_earlychildhood'] = "Auth Primera Infancia";
+$string['auth_echdescription'] = "Permite autenticar un usuario utilizando la aplicación para el proyecto de Primaria Infancia.";
+$string['grant_type'] = "Grant type";
+$string['grant_type_description'] = "Tipo de concesión";
+$string['client_id'] = "Client ID";
+$string['client_id_description'] = "Permite autenticar un usuario utilizando la aplicación para el proyecto de Primaria Infancia.";
+$string['client_secret'] = "Client secret";
+$string['client_secret_description'] = "Clave única del cliente";
+$string['url_token'] = "Token URL";
+$string['url_token_description'] = "URL para obtener el token de autorización";
+$string['url_current_user'] = "Usuario activo URL";
+$string['url_current_user_description'] = "URL para obtener el usuario activo";

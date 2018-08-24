@@ -36,29 +36,39 @@ ini_set('display_errors', 1);
 
 class auth_plugin_earlychildhood extends auth_plugin_base {
 
+    /**
+     * Constructor.
+    */  
+    function __construct() {
+        global $CFG;
+        require_once($CFG->libdir.'/adodb/adodb.inc.php');
+
+        $this->authtype = 'earlychildhood';
+        $this->config = get_config('auth_earlychildhood');
+        $this->errorlogtag = '[AUTH EARLYCHILDHOOD] ';
+    }
+
     public function loginpage_hook(){
         
         global $CFG;
 
         $current_user_encode = $_GET['currentUser'];
 
-        $grant_type = "password";
-        $client_id = "1_3bcbxd9e24g0gk4swg0kwgcwg4o8k8g4g888kwc44gcc0gwwk4";
-        $client_secret = "4ok2x70rlfokc8g0wws8c8kwcokw80k44sg48goc0ok4w0so0k";
-        $earlychildhood_token = "http://primerainfanciasantiagodecali.org/app/web/oauth/v2/token";
-        $earlychildhood_active_user = "http://primerainfanciasantiagodecali.org/app/web/api/currentUser/".$current_user_encode;
+        $config = $this->config;
+
+        $earlychildhood_active_user = $config->url_current_user."/".$current_user_encode;
         $username = "admin";
         $password = "admin1234";
 
-        $data_array = array("grant_type" => $grant_type,
-                            "client_id" => $client_id,
-                            "client_secret" => $client_secret,
+        $data_array = array("grant_type" => $config->grant_type,
+                            "client_id" => $config->client_id,
+                            "client_secret" => $config->client_secret,
                             "username" => $username,
                             "password" => $password);
 
         $data = json_encode($data_array);
 
-        $ch_token = curl_init($earlychildhood_token);
+        $ch_token = curl_init($config->url_token);
 
         //Setting CURL Request
 
@@ -75,6 +85,7 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
         
         // Close CURL request
         curl_close($ch_token);
+
         if(!$response) {
             return false;
         }else{
@@ -102,25 +113,56 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
         $response_active_user = curl_exec($ch_active_user);
         $httpcode = curl_getinfo($ch_active_user);
 
-        print_r('<br>');
-        print_r($httpcode);
-        
-        
+        // print_r('<br>');
+        // print_r($httpcode);
 
         curl_close($ch_active_user);
 
         if(!$response_active_user) {
             return false;
         }else{
-            print_r('Response decoded');
-            print_r('<br>');
-            print_r(json_decode($response_active_user));
+
+            $response_active_user = json_decode($response_active_user);
+
+            print_r('Response decoded <br>');
+            print_r($response_active_user);
+
+            $current_user = $response_active_user->info;
+
+            $username = $current_user[0]->persona->documentoIdentidad;
+
+            $user = authenticate_user_login($username, null);
+
+            if($user){
+
+                require_once($CFG->dirroot . '/user/lib.php');
+                    
+                // we need to configure a new user account
+                $user = new stdClass();
+                
+                //$user->mnethostid = $CFG->mnet_localhost_id;
+                //$user->confirmed = 1;
+                $user->username = $username;
+                $user->password = AUTH_PASSWORD_NOT_CACHED;
+                $user->firstname = $current_user[0]->persona->nombres;
+                $user->lastname = $current_user[0]->persona->apellidos;
+                $user->email = $current_user[0]->persona->correo;
+                $user->description = $account->description;
+                
+                $id = user_create_user($user, false);
+                
+                $user = $DB->get_record('user', array('id'=>$id));
+
+            }
         }
     }
 
     public function user_login($username, $password) {
         global $CFG, $DB;
-        if ($user = $DB->get_record('user', array('username'=>$username, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'earlychildhood'))) {
+
+        print_r("entro");
+        $user = $DB->get_record('user', array('username'=>$username, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'earlychildhood'));
+        if ($user) {
             return true;
         }
         return false;
@@ -129,6 +171,27 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
     function callback_handler() {
 
     }
+
+    // stdClass Object ( [error] => 
+    //                   [info] => Array ( [0] => stdClass Object ( [idUsuario] => 5 
+    //                                                              [nick] => pedroperez 
+    //                                                              [clave] => d8ae5776067290c4712fa454006c8ec6 
+    //                                                              [ultimoAcceso] => stdClass Object ( [date] => 2018-08-24 19:51:33.000000 
+    //                                                                                                  [timezone_type] => 3 [timezone] => UTC ) 
+    //                                                              [estado] => 1 
+    //                                                              [rol] => stdClass Object ( [idRol] => 4 
+    //                                                                                         [nombre] => Tutor 
+    //                                                                                         [descripcion] => Parsona encargada de diligenciar los formularios ) 
+    //                                                              [persona] => stdClass Object ( [idPersona] => 32 
+    //                                                                                             [nombres] => PEDRO PEREZ 
+    //                                                                                             [apellidos] => 
+    //                                                                                             [documentoIdentidad] => 987654321 
+    //                                                                                             [tipoDoc] => [fechaNacimiento] => 
+    //                                                                                             [genero] => 
+    //                                                                                             [telefonoFijo] => 
+    //                                                                                             [numeroContacto] => 9999999 
+    //                                                                                             [cei] => 9999 
+    //                                                                                             [correo] => sistemas.revistas@correounivalle.edu.co [datoExtra] => ) [etapaActual] => stdClass Object ( [idEtapa] => 5 [nombre] => FASE 1A [descripcion] => Acompañamiento - Fase 1 [fechaInicio] => stdClass Object ( [date] => 2018-01-17 00:00:00.000000 [timezone_type] => 3 [timezone] => UTC ) [fechaFin] => stdClass Object ( [date] => 2018-11-30 00:00:00.000000 [timezone_type] => 3 [timezone] => UTC ) ) ) ) )     
 
 
 }

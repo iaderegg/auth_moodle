@@ -22,7 +22,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2018082100;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->version   = 2018082400;        // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2016051900;        // Requires this Moodle version
 $plugin->component = 'auth_earlychildhood';  // Full name of the plugin (used for diagnostics)
 $plugin->maturity = MATURITY_ALPHA;
