@@ -50,148 +50,176 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
 
     public function loginpage_hook(){
         
-        global $CFG;
+        global $CFG, $DB;
 
-        $current_user_encode = $_GET['currentUser'];
-
-        $config = $this->config;
-
-        $earlychildhood_active_user = $config->url_current_user."/".$current_user_encode;
-        $username = "admin";
-        $password = "admin1234";
-
-        $data_array = array("grant_type" => $config->grant_type,
-                            "client_id" => $config->client_id,
-                            "client_secret" => $config->client_secret,
-                            "username" => $username,
-                            "password" => $password);
-
-        $data = json_encode($data_array);
-
-        $ch_token = curl_init($config->url_token);
-
-        //Setting CURL Request
-
-        curl_setopt($ch_token, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch_token, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch_token, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($ch_token, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($data))
-        );
-        
-        // Response to request
-        $response = curl_exec($ch_token);
-        
-        // Close CURL request
-        curl_close($ch_token);
-
-        if(!$response) {
-            return false;
+        if(!isset($_GET['currentUser'])){
+            $authplugin = get_auth_plugin('email');
+            $authplugin->loginpage_hook();
+            print_r("Auth email...");
+            
         }else{
-            $response_decode = json_decode($response);
-        }
+            $current_user_encode = $_GET['currentUser'];
 
-        $access_token = $response_decode->access_token;
+            $config = $this->config;
 
-        // Request for active user in app
-        $ch_active_user = curl_init();
+            $earlychildhood_active_user = $config->url_current_user."/".$current_user_encode;
+            $username = "admin";
+            $password = "admin1234";
 
-        curl_setopt($ch_active_user, CURLOPT_URL, $earlychildhood_active_user);
-        curl_setopt($ch_active_user, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch_active_user, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch_active_user, CURLOPT_CUSTOMREQUEST, "GET");
-        curl_setopt($ch_active_user, CURLOPT_HEADER, false); 
-        curl_setopt($ch_active_user, CURLOPT_VERBOSE, false);
-        curl_setopt($ch_active_user, CURLOPT_TIMEOUT, 500);
-        curl_setopt($ch_active_user, CURLOPT_HTTPHEADER, array(
-            'Authorization: Bearer '.$access_token
-            )
-        );
+            $data_array = array("grant_type" => $config->grant_type,
+                                "client_id" => $config->client_id,
+                                "client_secret" => $config->client_secret,
+                                "username" => $username,
+                                "password" => $password);
 
-        // Response to request
-        $response_active_user = curl_exec($ch_active_user);
-        $httpcode = curl_getinfo($ch_active_user);
+            $data = json_encode($data_array);
 
-        // print_r('<br>');
-        // print_r($httpcode);
+            $ch_token = curl_init($config->url_token);
 
-        curl_close($ch_active_user);
+            //Setting CURL Request
 
-        if(!$response_active_user) {
-            return false;
-        }else{
+            curl_setopt($ch_token, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch_token, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($ch_token, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($ch_token, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data))
+            );
+            
+            // Response to request
+            $response = curl_exec($ch_token);
+            
+            // Close CURL request
+            curl_close($ch_token);
 
-            $response_active_user = json_decode($response_active_user);
+            if(!$response) {
+                return false;
+            }else{
+                $response_decode = json_decode($response);
+            }
 
-            print_r('Response decoded <br>');
-            print_r($response_active_user);
+            $access_token = $response_decode->access_token;
 
-            $current_user = $response_active_user->info;
+            // Request for active user in app
+            $ch_active_user = curl_init();
 
-            $username = $current_user[0]->persona->documentoIdentidad;
+            curl_setopt($ch_active_user, CURLOPT_URL, $earlychildhood_active_user);
+            curl_setopt($ch_active_user, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch_active_user, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch_active_user, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch_active_user, CURLOPT_HEADER, false); 
+            curl_setopt($ch_active_user, CURLOPT_VERBOSE, false);
+            curl_setopt($ch_active_user, CURLOPT_TIMEOUT, 500);
+            curl_setopt($ch_active_user, CURLOPT_HTTPHEADER, array(
+                'Authorization: Bearer '.$access_token
+                )
+            );
 
-            $user = authenticate_user_login($username, null);
+            // Response to request
+            $response_active_user = curl_exec($ch_active_user);
+            $httpcode = curl_getinfo($ch_active_user);
 
-            if($user){
+            curl_close($ch_active_user);
 
-                require_once($CFG->dirroot . '/user/lib.php');
+            if(!$response_active_user) {
+                
+                return false;
+
+            }else{
+
+                $response_active_user = json_decode($response_active_user);
+
+                $urltogo = $CFG->wwwroot.'/';
+
+                print_r('Response decoded <br>');
+                print_r($response_active_user);
+
+                $current_user = $response_active_user->info;
+
+                $username = $current_user[0]->persona->documentoIdentidad;
+
+                $user = $this->user_login($username, $username);
+
+                print_r("User in user_login: <br>");
+                var_dump($user);
+                print_r("Username: <br>");
+                var_dump($username);
+
+                if($user){
+
+                    print_r("El usuario ya existe <br>");
+
+                    $sql_query = "SELECT * 
+                                FROM {user}
+                                WHERE username = '$username'";
+
+                    $user = $DB->get_record_sql($sql_query);
+
                     
-                // we need to configure a new user account
-                $user = new stdClass();
-                
-                //$user->mnethostid = $CFG->mnet_localhost_id;
-                //$user->confirmed = 1;
-                $user->username = $username;
-                $user->password = AUTH_PASSWORD_NOT_CACHED;
-                $user->firstname = $current_user[0]->persona->nombres;
-                $user->lastname = $current_user[0]->persona->apellidos;
-                $user->email = $current_user[0]->persona->correo;
-                $user->description = $account->description;
-                
-                $id = user_create_user($user, false);
-                
-                $user = $DB->get_record('user', array('id'=>$id));
+                    complete_user_login($user);
+                    
+                    // foreach($authsequence as $authname) {
+                    //     $authplugin = get_auth_plugin($authname);
+                    //     $authplugin->loginpage_hook();
+                    // }
+                    // redirect($urltogo);
+                    
+                }else{
+                    print_r("El usuario no existe <br>");
 
+                    require_once($CFG->dirroot . '/user/lib.php');
+                        
+                    // Se configura el nuevo usuario a crear
+                    $user = new stdClass();
+                
+                    $user->username = (string)$username;
+                    $user->password =  sha1((string)$username);
+                    $user->firstname = (string)$current_user[0]->persona->nombres;
+                    $user->lastname = (string)$current_user[0]->persona->apellidos;
+                    $user->email = (string)$current_user[0]->persona->correo;
+                    $user->description = (string)$account->description;
+                    
+                    $id = user_create_user($user, false);
+
+                    print_r("Identificador usuario creado: <br>");
+                    var_dump($id);
+                    
+                    $sql_query = "SELECT * 
+                                FROM {user}
+                                WHERE id = $id";
+
+                    $user = $DB->get_record_sql($sql_query);
+
+                    if($user){
+                        print_r("Usuario creado exitosamente <br>");
+                        print_r($user);
+                    }
+
+                    complete_user_login($user);
+                    // redirect($urltogo);
+                }
             }
         }
+
+        
     }
 
     public function user_login($username, $password) {
         global $CFG, $DB;
 
         print_r("entro");
-        $user = $DB->get_record('user', array('username'=>$username, 'mnethostid'=>$CFG->mnet_localhost_id, 'auth'=>'earlychildhood'));
+        $user = $DB->get_record('user', array('username'=>$username));
         if ($user) {
+            print_r("True: ");
+            print_r($user);
             return true;
         }
+        print_r("False: ");
+        print_r($user);
         return false;
     }
 
     function callback_handler() {
 
     }
-
-    // stdClass Object ( [error] => 
-    //                   [info] => Array ( [0] => stdClass Object ( [idUsuario] => 5 
-    //                                                              [nick] => pedroperez 
-    //                                                              [clave] => d8ae5776067290c4712fa454006c8ec6 
-    //                                                              [ultimoAcceso] => stdClass Object ( [date] => 2018-08-24 19:51:33.000000 
-    //                                                                                                  [timezone_type] => 3 [timezone] => UTC ) 
-    //                                                              [estado] => 1 
-    //                                                              [rol] => stdClass Object ( [idRol] => 4 
-    //                                                                                         [nombre] => Tutor 
-    //                                                                                         [descripcion] => Parsona encargada de diligenciar los formularios ) 
-    //                                                              [persona] => stdClass Object ( [idPersona] => 32 
-    //                                                                                             [nombres] => PEDRO PEREZ 
-    //                                                                                             [apellidos] => 
-    //                                                                                             [documentoIdentidad] => 987654321 
-    //                                                                                             [tipoDoc] => [fechaNacimiento] => 
-    //                                                                                             [genero] => 
-    //                                                                                             [telefonoFijo] => 
-    //                                                                                             [numeroContacto] => 9999999 
-    //                                                                                             [cei] => 9999 
-    //                                                                                             [correo] => sistemas.revistas@correounivalle.edu.co [datoExtra] => ) [etapaActual] => stdClass Object ( [idEtapa] => 5 [nombre] => FASE 1A [descripcion] => Acompañamiento - Fase 1 [fechaInicio] => stdClass Object ( [date] => 2018-01-17 00:00:00.000000 [timezone_type] => 3 [timezone] => UTC ) [fechaFin] => stdClass Object ( [date] => 2018-11-30 00:00:00.000000 [timezone_type] => 3 [timezone] => UTC ) ) ) ) )     
-
-
 }
