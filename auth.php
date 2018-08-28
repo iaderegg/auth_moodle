@@ -50,12 +50,11 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
 
     public function loginpage_hook(){
         
-        global $CFG, $DB;
+        global $CFG, $DB, $OUTPUT, $PAGE;
 
         if(!isset($_GET['currentUser'])){
             $authplugin = get_auth_plugin('email');
             $authplugin->loginpage_hook();
-            print_r("Auth email...");
             
         }else{
             $current_user_encode = $_GET['currentUser'];
@@ -131,23 +130,13 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
 
                 $urltogo = $CFG->wwwroot.'/';
 
-                print_r('Response decoded <br>');
-                print_r($response_active_user);
-
                 $current_user = $response_active_user->info;
 
                 $username = $current_user[0]->persona->documentoIdentidad;
 
                 $user = $this->user_login($username, $username);
 
-                print_r("User in user_login: <br>");
-                var_dump($user);
-                print_r("Username: <br>");
-                var_dump($username);
-
                 if($user){
-
-                    print_r("El usuario ya existe <br>");
 
                     $sql_query = "SELECT * 
                                 FROM {user}
@@ -158,11 +147,7 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
                     
                     complete_user_login($user);
                     
-                    // foreach($authsequence as $authname) {
-                    //     $authplugin = get_auth_plugin($authname);
-                    //     $authplugin->loginpage_hook();
-                    // }
-                    // redirect($urltogo);
+                    redirect($urltogo);
                     
                 }else{
                     print_r("El usuario no existe <br>");
@@ -180,9 +165,6 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
                     $user->description = (string)$account->description;
                     
                     $id = user_create_user($user, false);
-
-                    print_r("Identificador usuario creado: <br>");
-                    var_dump($id);
                     
                     $sql_query = "SELECT * 
                                 FROM {user}
@@ -190,13 +172,8 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
 
                     $user = $DB->get_record_sql($sql_query);
 
-                    if($user){
-                        print_r("Usuario creado exitosamente <br>");
-                        print_r($user);
-                    }
-
                     complete_user_login($user);
-                    // redirect($urltogo);
+                    redirect($urltogo);
                 }
             }
         }

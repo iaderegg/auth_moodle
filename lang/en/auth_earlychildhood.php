@@ -23,6 +23,7 @@
 $string['pluginname'] = "Autenticación Primera Infancia";
 $string['auth_earlychildhood'] = "Auth Primera Infancia";
 $string['auth_echdescription'] = "Permite autenticar un usuario utilizando la aplicación para el proyecto de Primaria Infancia.";
+$string['auth_ech_noparameter'] = "Error: Fallo al establecer conexión. Por favor intente ingresar con sus credenciales asignadas <br> Código de error: 101";
 $string['grant_type'] = "Grant type";
 $string['grant_type_description'] = "Tipo de concesión";
 $string['client_id'] = "Client ID";
