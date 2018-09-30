@@ -74,8 +74,10 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             //Setting CURL Request
             curl_setopt($ch_token, CURLOPT_URL, $config->url_token);
             curl_setopt($ch_token, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch_token, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($ch_token, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch_token, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($ch_token, CURLOPT_TIMEOUT, 500);
             curl_setopt($ch_token, CURLOPT_HTTPHEADER, array(
                 'Content-Type: application/json',
                 'Content-Length: ' . strlen($data))
@@ -83,10 +85,6 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             
             // Response to request
             $response = curl_exec($ch_token);
-
-            print_r("Response: ");
-            print_r($response);
-            print_r("<br>");
 
             // Close CURL request
             curl_close($ch_token);
@@ -150,9 +148,7 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
 
                     
                     complete_user_login($user);
-                    
-                    // redirect($urltogo);
-                    
+                    redirect($urltogo);
                 }else{
 
                     require_once($CFG->dirroot . '/user/lib.php');
@@ -176,7 +172,7 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
                     $user = $DB->get_record_sql($sql_query);
 
                     complete_user_login($user);
-                    // redirect($urltogo);
+                    redirect($urltogo);
                 }
             }
         }
