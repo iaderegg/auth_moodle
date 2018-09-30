@@ -29,12 +29,6 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 require_once($CFG->libdir.'/authlib.php');
-require_once($CFG->dirroot.'/enrol/self/lib.php');
-require_once($CFG->dirroot.'/enrol/self/locallib.php');
-
-
-error_reporting(E_ALL); 
-ini_set('display_errors', 1);
 
 class auth_plugin_earlychildhood extends auth_plugin_base {
 
@@ -89,6 +83,9 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             
             // Response to request
             $response = curl_exec($ch_token);
+
+            print_r("Reponse token: ");
+            print_r($response);
             
             // Close CURL request
             curl_close($ch_token);
@@ -120,6 +117,10 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             $response_active_user = curl_exec($ch_active_user);
             $httpcode = curl_getinfo($ch_active_user);
 
+            print_r("Reponse active user: ");
+            print_r($response_active_user);
+            print_r($httpdcode);
+
             curl_close($ch_active_user);
 
             if(!$response_active_user) {
@@ -129,16 +130,14 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             }else{
 
                 $response_active_user = json_decode($response_active_user);
-                $urltogo = $CFG->wwwroot.'/course/view.php?id=2';
+
+                $urltogo = $CFG->wwwroot.'/';
+
                 $current_user = $response_active_user->info;
+
                 $username = $current_user[0]->persona->documentoIdentidad;
 
                 $user = $this->user_login($username, $username);
-                
-                $studentrole = $DB->get_record('role', array('shortname'=>'student'));
-                $instance = $DB->get_record('enrol', array('courseid'=>2, 'enrol'=>'manual'), '*', MUST_EXIST);
-                $context = context_course::instance(2);
-                $manualplugin = enrol_get_plugin('manual');
 
                 if($user){
 
@@ -148,13 +147,13 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
 
                     $user = $DB->get_record_sql($sql_query);
 
+                    
                     complete_user_login($user);
-
-                    $enrol_result = $manualplugin->enrol_user($instance, $user->id, $studentrole->id);
-
-                    redirect($urltogo);
+                    
+                    // redirect($urltogo);
                     
                 }else{
+
                     require_once($CFG->dirroot . '/user/lib.php');
                         
                     // Se configura el nuevo usuario a crear
@@ -166,8 +165,6 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
                     $user->lastname = (string)$current_user[0]->persona->apellidos;
                     $user->email = (string)$current_user[0]->persona->correo;
                     $user->description = (string)$account->description;
-                    $user->mnethostid = '1';
-                    $user->confirmed = 1;
                     
                     $id = user_create_user($user, false);
                     
@@ -178,13 +175,12 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
                     $user = $DB->get_record_sql($sql_query);
 
                     complete_user_login($user);
-
-                    $manualplugin->enrol_user($instance, $user->id, $studentrole->id);
-                    
-                    redirect($urltogo);
+                    // redirect($urltogo);
                 }
             }
         }
+
+        
     }
 
     public function user_login($username, $password) {
