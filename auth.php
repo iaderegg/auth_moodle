@@ -71,8 +71,10 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
 
             $ch_token = curl_init($config->url_token);
 
-            //Setting CURL Request
+            print_r($config->url_token);
 
+            //Setting CURL Request
+        
             curl_setopt($ch_token, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch_token, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch_token, CURLOPT_POSTFIELDS, $data);
