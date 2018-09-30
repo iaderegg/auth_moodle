@@ -69,11 +69,10 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
 
             $data = json_encode($data_array);
 
-            $ch_token = curl_init($config->url_token);
-            print_r($data);
+            $ch_token = curl_init();
 
             //Setting CURL Request
-        
+            curl_setopt($ch_token, CURLOPT_URL, $config->url_token);
             curl_setopt($ch_token, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch_token, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch_token, CURLOPT_POSTFIELDS, $data);
@@ -84,6 +83,10 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             
             // Response to request
             $response = curl_exec($ch_token);
+
+            print_r("Response: ");
+            print_r($response);
+            print_r("<br>");
 
             // Close CURL request
             curl_close($ch_token);
