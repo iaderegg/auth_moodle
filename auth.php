@@ -88,7 +88,7 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             curl_close($ch_token);
 
             if(!$response) {
-                print_r("Reponse token: ");
+                print_r("No response: ");
                 print_r($response);
                 return false;
             }else{
