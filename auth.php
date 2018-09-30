@@ -71,8 +71,6 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
 
             $ch_token = curl_init($config->url_token);
 
-            print_r($config->url_token);
-
             //Setting CURL Request
         
             curl_setopt($ch_token, CURLOPT_RETURNTRANSFER, true);
@@ -86,13 +84,12 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             // Response to request
             $response = curl_exec($ch_token);
 
-            print_r("Reponse token: ");
-            print_r($response);
-            
             // Close CURL request
             curl_close($ch_token);
 
             if(!$response) {
+                print_r("Reponse token: ");
+                print_r($response);
                 return false;
             }else{
                 $response_decode = json_decode($response);
