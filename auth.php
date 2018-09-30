@@ -70,6 +70,7 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             $data = json_encode($data_array);
 
             $ch_token = curl_init($config->url_token);
+            print_r($data);
 
             //Setting CURL Request
         
@@ -88,8 +89,6 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             curl_close($ch_token);
 
             if(!$response) {
-                print_r("No response: ");
-                print_r($response);
                 return false;
             }else{
                 $response_decode = json_decode($response);
