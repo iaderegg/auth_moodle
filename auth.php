@@ -116,9 +116,9 @@ class auth_plugin_earlychildhood extends auth_plugin_base {
             $response_active_user = curl_exec($ch_active_user);
             $httpcode = curl_getinfo($ch_active_user);
 
-            print_r("Reponse active user: ");
-            print_r($response_active_user);
-            print_r($httpdcode);
+            //print_r("Reponse active user: ");
+            //print_r($response_active_user);
+            //print_r($httpdcode);
 
             curl_close($ch_active_user);
 
